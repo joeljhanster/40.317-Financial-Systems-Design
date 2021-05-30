@@ -76,6 +76,25 @@ penny = Decimal('0.01')
 #   Must return the string "[OK] Supported commands: " followed by
 #   a comma-separated list of the above commands.
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def is_positive_number(s):
+    if is_number(s):
+        return Decimal(s) > 0
+    else:
+        return False
+
+def is_positive_integer(s):
+    if is_positive_number(s):
+        return s.isnumeric()
+    else:
+        return False
+
 
 while True:
     message = socket.recv()
@@ -84,33 +103,71 @@ while True:
     if len(tokens) == 0:
         continue
     cmd = tokens[0]
-    if cmd == "shutdown_server":
+    if cmd == "shutdown_server": 
         socket.send_string("[OK] Server shutting down")
         sys.exit(0)
-    elif cmd == "help":
-        response = "[OK] Supported commands: "
-        response += "[buy <# of shares> <price per share>, "
-        response += "sell <# of shares> <price per share>, "
-        response += "deposit_cash <amount>, "
-        response += "get_share_balance, "
-        response += "get_cash_balance, "
-        response += "shutdown_server, "
-        response += "help]"
-        socket.send_string(response)
-    elif cmd == "buy":
-        if len(tokens[1:]) < 2:
-            socket.send_string("[ERROR] Two arguments expected, only received {0}.".format(len(tokens[1:])))
-        # try:
-        #     no_of_shares = int(token[1])
-        # except ValueError:
-        #     socket.send_string("[ERROR] First argument (# of shares) needs to be an Integer.")
-        # try:
-        #     price_per_share = float(token[2])
-        # except ValueError:
-        #     socket.send_string("[ERROR] Secondg argument (price per share) needs to be a Float.")
-
     else:
         options = tokens[1:]
+        print(f"Received: {cmd} {options}")
+
         # The response is a function of cmd and options:
-        response = ...  # YOUR CODE HERE
+        if cmd == "buy":
+            if len(options) != 2:
+                response = "[ERROR] Format is: buy <# of shares> <price per share>"
+            elif not is_positive_integer(options[0]) or not is_positive_number(options[1]):
+                response = "[ERROR] <# of share> is positive integer, <price per share> is positive float"
+            else:
+                trade = Decimal(options[0]) * Decimal(options[1])
+                if trade > cash_balance:
+                    response = f"[ERROR] Cash Balance not enough. {cash_balance} vs trade: {trade}."
+                else:
+                    cash_balance -= trade
+                    share_balance += Decimal(options[0])
+                    response = "[OK] Purchased"
+
+        elif cmd == "sell":
+            if len(options) != 2:
+                response = "[ERROR] Format is: sell <# of shares> <price per share>"
+            elif not is_positive_integer(options[0]) or not is_positive_number(options[1]):
+                response = "[ERROR] <# of share> is positive integer, <price per share> is float"
+            else:
+                n_shares, price = Decimal(options[0]), Decimal(options[1])
+                if  n_shares > share_balance:
+                    response = f"[ERROR] Share Balance not enough. {share_balance} vs trade: {n_shares}."
+                else:
+                    cash_balance += n_shares * price
+                    share_balance -= n_shares
+                    response = "[OK] Sold"
+
+        elif cmd == "deposit_cash":
+            if len(options) != 1:
+                response = "[ERROR] Format is: deposit_cash <amount>"
+            elif not is_positive_number(options[0]):
+                response = "[ERROR] <amount> is positive float"
+            else:
+                amt = Decimal(options[0])
+                cash_balance += amt
+                response = "[OK] Deposited"
+
+        elif cmd == "get_share_balance":
+            if len(options) != 0:
+                response = "[ERROR] Format is: get_share_balance"
+            else:
+                response = f"[OK] {share_balance}"
+
+        elif cmd == "get_cash_balance":
+            if len(options) != 0:
+                response = "[ERROR] Format is: get_cash_balance"
+            else:
+                response = f"[OK] {cash_balance}"
+
+        elif cmd == "help":
+            if len(options) != 0:
+                response = "[ERROR] Format is: help"
+            else:
+                response = "[OK] Supported commands: buy <# of shares> <price per share>, sell <# of shares> <price per share>, deposit_cash <amount>, get_share_balance, get_cash_balance, shutdown_server, help"
+        
+        else:
+            response = "[ERROR] Unknown command"
+
         socket.send_string(response)
