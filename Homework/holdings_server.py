@@ -83,11 +83,13 @@ def is_number(s):
     except ValueError:
         return False
 
+
 def is_positive_number(s):
     if is_number(s):
         return Decimal(s) > 0
     else:
         return False
+
 
 def is_positive_integer(s):
     if is_positive_number(s):
@@ -103,7 +105,7 @@ while True:
     if len(tokens) == 0:
         continue
     cmd = tokens[0]
-    if cmd == "shutdown_server": 
+    if cmd == "shutdown_server":
         socket.send_string("[OK] Server shutting down")
         sys.exit(0)
     else:
@@ -113,13 +115,25 @@ while True:
         # The response is a function of cmd and options:
         if cmd == "buy":
             if len(options) != 2:
-                response = "[ERROR] Format is: buy <# of shares> <price per share>"
-            elif not is_positive_integer(options[0]) or not is_positive_number(options[1]):
-                response = "[ERROR] <# of share> is positive integer, <price per share> is positive float"
+                response = (
+                    "[ERROR] Format is: "
+                    "buy <# of shares> <price per share>"
+                ).format(3, 5)
+            elif (
+                not is_positive_integer(options[0]) or
+                not is_positive_number(options[1])
+            ):
+                response = (
+                    "[ERROR] <# of share> is positive integer, "
+                    "<price per share> is positive float"
+                ).format(3, 5)
             else:
                 trade = Decimal(options[0]) * Decimal(options[1])
                 if trade > cash_balance:
-                    response = f"[ERROR] Cash Balance not enough. {cash_balance} vs trade: {trade}."
+                    response = (
+                        "[ERROR] Cash Balance not enough. "
+                        f"{cash_balance} vs trade: {trade}."
+                    ).format(3, 5)
                 else:
                     cash_balance -= trade
                     share_balance += Decimal(options[0])
@@ -127,13 +141,25 @@ while True:
 
         elif cmd == "sell":
             if len(options) != 2:
-                response = "[ERROR] Format is: sell <# of shares> <price per share>"
-            elif not is_positive_integer(options[0]) or not is_positive_number(options[1]):
-                response = "[ERROR] <# of share> is positive integer, <price per share> is float"
+                response = (
+                    "[ERROR] Format is: "
+                    "sell <# of shares> <price per share>"
+                ).format(3, 5)
+            elif (
+                not is_positive_integer(options[0]) or
+                not is_positive_number(options[1])
+            ):
+                response = (
+                    "[ERROR] <# of share> is positive integer, "
+                    "<price per share> is positive float"
+                ).format(3, 5)
             else:
                 n_shares, price = Decimal(options[0]), Decimal(options[1])
-                if  n_shares > share_balance:
-                    response = f"[ERROR] Share Balance not enough. {share_balance} vs trade: {n_shares}."
+                if n_shares > share_balance:
+                    response = (
+                        "[ERROR] Share Balance not enough. "
+                        f"{share_balance} vs trade: {n_shares}."
+                    ).format(3, 5)
                 else:
                     cash_balance += n_shares * price
                     share_balance -= n_shares
@@ -165,8 +191,16 @@ while True:
             if len(options) != 0:
                 response = "[ERROR] Format is: help"
             else:
-                response = "[OK] Supported commands: buy <# of shares> <price per share>, sell <# of shares> <price per share>, deposit_cash <amount>, get_share_balance, get_cash_balance, shutdown_server, help"
-        
+                response = (
+                    "[OK] Supported commands: "
+                    "buy <# of shares> <price per share>, "
+                    "sell <# of shares> <price per share>, "
+                    "deposit_cash <amount>, "
+                    "get_share_balance, "
+                    "get_cash_balance, "
+                    "shutdown_server, "
+                    "help"
+                ).format(3, 5)
         else:
             response = "[ERROR] Unknown command"
 
