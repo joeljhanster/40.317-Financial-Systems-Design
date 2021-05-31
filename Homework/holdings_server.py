@@ -1,8 +1,10 @@
 # The server code for 40.317 Homework 1.  This code is not complete.
-
+from threading import Thread
 import zmq
 import sys
 from decimal import Decimal, DecimalException
+from collections import deque
+from time import sleep
 
 # To run the server at a non-default port, the user provides the alternate port
 # number on the command line.
@@ -29,6 +31,14 @@ cash_balance = Decimal('0')
 # (You might find this useful for rounding off cash amounts:)
 penny = Decimal('0.01')
 
+# This server stores the purchase and sales history:
+# - VWAP of all purchases so far
+purchase_hist = deque()
+# - VWAP of all sales so far
+sales_hist = deque()
+
+# This server stores the calculated VWAP:
+vwap_hist = deque([('N/A', 'N/A')])
 
 # This server must support the following commands:
 # - "buy <# of shares> <price per share>"
@@ -76,6 +86,7 @@ penny = Decimal('0.01')
 #   Must return the string "[OK] Supported commands: " followed by
 #   a comma-separated list of the above commands.
 
+
 def is_number(s):
     try:
         float(s)
@@ -96,6 +107,51 @@ def is_positive_integer(s):
         return s.isnumeric()
     else:
         return False
+
+
+# Implement Daemon Thread
+def compute_vwap():
+    while True:
+        buy_vwap = 'N/A'
+        sell_vwap = 'N/A'
+
+        if len(purchase_hist) > 0:
+            purchase_val = Decimal('0')
+            purchase_qty = Decimal('0')
+
+            # Compute VWAP for purchase history
+            for purchase in purchase_hist:
+                n_shares = purchase[0]
+                price = purchase[1]
+                purchase_val += n_shares * price
+                purchase_qty += n_shares
+
+            buy_vwap = round(purchase_val / purchase_qty, 4)
+            # print(f'VWAP of all purchases: {buy_vwap}')
+
+        if len(sales_hist) > 0:
+            sales_val = Decimal('0')
+            sales_qty = Decimal('0')
+
+            # Compute VWAP for sales history
+            for sales in sales_hist:
+                n_shares = sales[0]
+                price = sales[1]
+                sales_val += n_shares * price
+                sales_qty += n_shares
+
+            sell_vwap = round(sales_val / sales_qty, 4)
+            # print(f'VWAP for all sales: {sell_vwap}')
+
+        vwap_hist.append((buy_vwap, sell_vwap))
+        if len(vwap_hist) > 1:
+            vwap_hist.popleft()
+
+        sleep(10)
+
+
+daemon = Thread(target=compute_vwap, name='Daemon', daemon=True)
+daemon.start()
 
 
 while True:
@@ -128,7 +184,8 @@ while True:
                     "<price per share> is positive float"
                 ).format(3, 5)
             else:
-                trade = Decimal(options[0]) * Decimal(options[1])
+                n_shares, price = Decimal(options[0]), Decimal(options[1])
+                trade = n_shares * price
                 if trade > cash_balance:
                     response = (
                         "[ERROR] Cash Balance not enough. "
@@ -136,7 +193,11 @@ while True:
                     ).format(3, 5)
                 else:
                     cash_balance -= trade
-                    share_balance += Decimal(options[0])
+                    share_balance += n_shares
+
+                    # Store purchase history
+                    purchase_hist.append((n_shares, price))
+
                     response = "[OK] Purchased"
 
         elif cmd == "sell":
@@ -163,6 +224,10 @@ while True:
                 else:
                     cash_balance += n_shares * price
                     share_balance -= n_shares
+
+                    # Store sales history
+                    sales_hist.append((n_shares, price))
+
                     response = "[OK] Sold"
 
         elif cmd == "deposit_cash":
@@ -187,6 +252,14 @@ while True:
             else:
                 response = f"[OK] {cash_balance}"
 
+        elif cmd == "get_latest_vwaps":
+            if len(options) != 0:
+                response = "[ERROR] Format is: get_latest_vwaps"
+            else:
+                print(vwap_hist)
+                buy_vwap, sell_vwap = vwap_hist[0][0], vwap_hist[0][1]
+                response = f"[OK] {buy_vwap} {sell_vwap}"
+
         elif cmd == "help":
             if len(options) != 0:
                 response = "[ERROR] Format is: help"
@@ -198,6 +271,7 @@ while True:
                     "deposit_cash <amount>, "
                     "get_share_balance, "
                     "get_cash_balance, "
+                    "get_latest_vwaps, "
                     "shutdown_server, "
                     "help"
                 ).format(3, 5)
