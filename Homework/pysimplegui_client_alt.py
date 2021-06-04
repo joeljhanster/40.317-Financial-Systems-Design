@@ -21,6 +21,9 @@ socket.connect("tcp://localhost:" + port)
 
 # PySimpleGUI ==============================================================================
 
+# sg.theme_previewer()
+sg.theme('Black')
+
 main = sg.Column([
     [sg.Frame(  title='Balances', 
                 layout=[    [sg.Text("Shares"), sg.Text("Cash", pad=(100, 0))],
