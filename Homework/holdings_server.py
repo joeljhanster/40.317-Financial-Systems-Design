@@ -256,7 +256,6 @@ while True:
             if len(options) != 0:
                 response = "[ERROR] Format is: get_latest_vwaps"
             else:
-                print(vwap_hist)
                 buy_vwap, sell_vwap = vwap_hist[0][0], vwap_hist[0][1]
                 response = f"[OK] {buy_vwap} {sell_vwap}"
 
