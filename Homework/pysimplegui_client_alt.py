@@ -121,5 +121,10 @@ while True:
     socket.send_string(rq)
     message = socket.recv().decode("utf-8")
     print(message)
+    response = message.split()[0]
     window['-CONSOLE_OUT-'].update(message)
+    if response == '[OK]':
+        window['-CONSOLE_OUT-'].update(text_color='green')
+    elif response == '[ERROR]':
+        window['-CONSOLE_OUT-'].update(text_color='red')
 
