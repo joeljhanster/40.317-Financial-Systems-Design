@@ -1,4 +1,3 @@
-# In[1]:
 import PySimpleGUI as sg
 import tkinter as tk
     
