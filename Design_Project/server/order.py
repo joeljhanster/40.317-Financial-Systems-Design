@@ -2,8 +2,9 @@ order_dir_types = ["BUY", "SELL"]
 order_status_types = ["LIVE", "SUBMITTED", "FILLED", "CANCELLED", "CANCELLABLE"]
 
 class Order:
-    def __init__(self, id, dir, status, price=None, size=50):
+    def __init__(self, id, team_id, dir, status, price, size):
         self.id = id
+        self.team_id = team_id
         self.dir = dir
         self.status = status
         self.price = price
@@ -20,13 +21,33 @@ class Order:
     def id(self, x):
         try:
             float(x)
-            if x == int(x) and x >= 0:
-                self._id = x
-            else:
-                raise ValueError(f"id must be non-negative integer")
-        except ValueError:
-            raise ValueError(f"id must be non-negative integer")
+        except:
+            raise ValueError(f"id '{x}' must be numeric (non-negative integer) ")
+        if float(x) != int(x):
+            raise ValueError(f"id '{x}' must be integer (non-float)")
+        elif int(x) < 0:
+            raise ValueError(f"if '{x}' must be non-negative")
+        else:
+            self._id = int(x)
     
+
+    @property
+    def team_id(self):
+        return self._team_id
+
+    @team_id.setter
+    def team_id(self, x):
+        try:
+            float(x)
+        except:
+            raise ValueError(f"id '{x}' must be numeric (non-negative integer) ")
+        if float(x) != int(x):
+            raise ValueError(f"id '{x}' must be integer (non-float)")
+        elif int(x) < 0:
+            raise ValueError(f"if '{x}' must be non-negative")
+        else:
+            self._team_id = int(x)
+
 
     @property           
     def dir(self): 
@@ -49,7 +70,7 @@ class Order:
     # status must be in the allowable list of words     
     def status(self, s):
         if s not in order_status_types:
-            raise ValueError(f"status must be 1 of {order_status_types}.")
+            raise ValueError(f"status {s} must be 1 of {order_status_types}.")
         else:
             self._status = s  
 
