@@ -60,13 +60,10 @@ class Test(unittest.TestCase):
         except ValueError:
             pass
 
-    def test_market_open_new_orders(self):
-        x = order.market_open_new_orders(1)
-        print(x)
-
-    def test_one_new_order(self):
-        order.one_new_order(1)
-        order.one_new_order(1, 'BUY')
+    def test_create_order(self):
+        # test Order factory method
+        order.create_order()
+        order.create_order(id=1001)
 
 if __name__ == '__main__':
     unittest.main()

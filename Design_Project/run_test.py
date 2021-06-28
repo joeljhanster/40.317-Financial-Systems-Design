@@ -1,3 +1,3 @@
-from server.test import *
+from server.test_order import *
 
 unittest.main()
