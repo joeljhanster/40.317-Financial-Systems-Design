@@ -1,4 +1,3 @@
-
 order_dir_types = ["BUY", "SELL"]
 order_status_types = ["LIVE", "SUBMITTED", "FILLED", "CANCELLED", "CANCELLABLE"]
 
@@ -9,6 +8,8 @@ class Order:
         self.status = status
         self.price = price
         self.size = size
+
+
 
     @property         # decorate the getter method
     def id(self): 
@@ -54,12 +55,14 @@ class Order:
 
 
     @property
-    def price(self, x):
+    def price(self):
         return self._price
 
     @price.setter
     # price must be positive number
     def price(self, x):
+        if x == None:
+            raise ValueError(f"price must not be None")
         try:
             float(x)
             if float(x) <= 0:
@@ -71,8 +74,9 @@ class Order:
 
 
 
+
     def __repr__(self):
-        return f"<Order {self.id}, {self.dir}, {self.status}>"
+        return f"(Order: {self.id}, {self.dir}, {self.status}, {self.price})"
 
     def __str__(self):
         return f"Order ID {self.id}. Direction: {self.dir}. Status: {self.status}"

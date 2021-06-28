@@ -1,5 +1,7 @@
 import unittest
 from .order import Order
+from . import order_factory as order
+
 
 class Test(unittest.TestCase):
 
@@ -57,6 +59,14 @@ class Test(unittest.TestCase):
             self.assertTrue(0)
         except ValueError:
             pass
+
+    def test_market_open_new_orders(self):
+        x = order.market_open_new_orders(1)
+        print(x)
+
+    def test_one_new_order(self):
+        order.one_new_order(1)
+        order.one_new_order(1, 'BUY')
 
 if __name__ == '__main__':
     unittest.main()
