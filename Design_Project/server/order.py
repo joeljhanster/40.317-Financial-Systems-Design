@@ -9,8 +9,6 @@ class Order:
         self.price = price
         self.size = size
 
-
-
     @property         # decorate the getter method
     def id(self): 
         return self._id
@@ -26,7 +24,6 @@ class Order:
                 raise ValueError(f"id must be non-negative integer")
         except ValueError:
             raise ValueError(f"id must be non-negative integer")
-    
 
     @property           
     def dir(self): 
@@ -40,7 +37,6 @@ class Order:
         else:
             self._dir = s  
 
-
     @property         
     def status(self): 
         return self._status
@@ -52,7 +48,6 @@ class Order:
             raise ValueError(f"status must be 1 of {order_status_types}.")
         else:
             self._status = s  
-
 
     @property
     def price(self):
@@ -71,12 +66,9 @@ class Order:
         except ValueError:
             raise ValueError(f"price must be (positive) float")
 
-
-
-
-
     def __repr__(self):
-        return f"(Order: {self.id}, {self.dir}, {self.status}, {self.price})"
+        return f"{self.id}_{self.size}_{self.price}_{self.dir}_{self.status}"
+        # return f"(Order: {self.id}, {self.dir}, {self.status}, {self.price})"
 
     def __str__(self):
         return f"Order ID {self.id}. Direction: {self.dir}. Status: {self.status}"

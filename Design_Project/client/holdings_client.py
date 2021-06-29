@@ -16,7 +16,7 @@ context = zmq.Context()
 # Using "zmq.PAIR" means there is exactly one server for each client
 # and vice-versa.  For this application, zmq.PAIR is more appropriate
 # than zmq.REQ + zmq.REP (make sure you understand why!).
-socket = context.socket(zmq.PAIR)
+socket = context.socket(zmq.REQ)
 print("Connecting to server...")
 socket.connect(f"tcp://{host}:{port}")
 
