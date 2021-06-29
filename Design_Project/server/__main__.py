@@ -56,6 +56,9 @@ while True:
                 response = "[ERROR] Please provide player name!"
             elif len(options) != 2:
                 response = f"[ERROR] Required 2 arguments, found {len(options)}"
+                
+            elif options[1].isalpha() and options[2].isalpha():
+                response = f"[ERROR] Only alphabetical characters allowed}"
             else:
                 family_name = options[0].replace("_", " ")
                 given_name = options[1].replace("_", " ")
