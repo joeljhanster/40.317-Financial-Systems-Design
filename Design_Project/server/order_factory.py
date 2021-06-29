@@ -3,7 +3,7 @@ from singleton import Singleton
 from order import Order
 import random
 
-class OrderFactory:
+class OrderFactory(object):
     __metaclass__ = Singleton
 
     def __init__(self):

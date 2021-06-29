@@ -50,6 +50,7 @@ while True:
         response = ""
 
         ### INSERT COMMANDS HERE ###
+        ### TEAM COMMANDS ###
         if cmd == "add_player":
             if len(options) == 0:
                 response = "[ERROR] Please provide player name!"
@@ -120,43 +121,71 @@ while True:
                 else:
                     response = "[ERROR] Team currently has no live orders"
 
-        elif cmd == "open_market":
-            if len(options) != 0:
-                response = f"[ERROR] Required no arguments, found {len(options)}"
+        # TODO
+        elif cmd == "get_team_metrics":
+            # <teamID>
+            # return <PnL> <matchedTradeCount> <unmatchedTradeCount> <errorTradeCount>
+            if len(options) == 0:
+                response = "[ERROR] Please provide team id!"
+            elif len(options) != 1:
+                respones = f"[ERROR] Required 1 argment, found {len(options)}"
             else:
-                exchange.open_market()
-                status = exchange.get_market_status()
+                team_id = options[0]
+                
+                # TODO: Get PnL
+                team = team_factory.get_team(team_id)
+                pnl = team.pnl
 
-                if status:
-                    response = "[OK] Market opened"
-                else:
-                    response = "[ERROR] Failed to open market"
+                # TODO: Get Trade Counts
 
-        elif cmd == "close_market":
-            if len(options) != 0:
-                response = (f"[ERROR] Required no arguments, found {len(options)}")
-            else:
-                exchange.close_market()
-                status = exchange.get_market_status()
+        # TODO
+        elif cmd == "submit_and_match":
+            # <idToFill>,<teamID>,<fillOrder.TradePrice>,<fillOrder.TradeSize>
+            pass
+        
+        # TODO
+        elif cmd == "cancel_live_order":
+            # <idToCancel> <teamId>
+            pass
 
-                if not status:
-                    response = "[OK] Market closed"
-                else:
-                    response = "[ERROR] Failed to close market"
-        
-        elif cmd == "get_elapsed_time":
-            response = exchange.get_elapsed_time()
-        
-        elif cmd == "get_start_time":
-            response = exchange.start_time
-        
-        elif cmd == "get_market_status":
-            status = exchange.get_market_status()
-            if status:
-                response = "[OK] Market opened"
-            else:
-                response = "[OK] Market closed"
 
+        ### TODO ADMIN COMMANDS ###
+        # elif cmd == "open_market":
+        #     if len(options) != 0:
+        #         response = f"[ERROR] Required no arguments, found {len(options)}"
+        #     else:
+        #         exchange.open_market()
+        #         status = exchange.get_market_status()
+
+        #         if status:
+        #             response = "[OK] Market opened"
+        #         else:
+        #             response = "[ERROR] Failed to open market"
+
+        # elif cmd == "close_market":
+        #     if len(options) != 0:
+        #         response = (f"[ERROR] Required no arguments, found {len(options)}")
+        #     else:
+        #         exchange.close_market()
+        #         status = exchange.get_market_status()
+
+        #         if not status:
+        #             response = "[OK] Market closed"
+        #         else:
+        #             response = "[ERROR] Failed to close market"
         
+        # elif cmd == "get_elapsed_time":
+        #     response = exchange.get_elapsed_time()
+        
+        # elif cmd == "get_start_time":
+        #     response = exchange.start_time
+        
+        # elif cmd == "get_market_status":
+        #     status = exchange.get_market_status()
+        #     if status:
+        #         response = "[OK] Market opened"
+        #     else:
+        #         response = "[OK] Market closed"
+
 
         socket.send_string(response)

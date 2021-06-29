@@ -80,14 +80,13 @@ col4 = sg.Column([[sg.T('P&L', size=(15,1), justification='center', relief=sg.RE
 tab2_layout = [[col3, col4]]    
 
 layout = [[sg.TabGroup([[sg.Tab('REGISTRATION', tab1_layout, tooltip='tip'), 
-         sg.Tab('DASHBOARD', tab2_layout)]], tooltip='TIP2')]]
+         sg.Tab('DASHBOARD', tab2_layout)]], key='-TABS-', change_submits=True, tooltip='TIP2')]]
     
 win = sg.Window('Trading Game Team Console', layout)
 
 # Display and interact with the Window using an Event Loop
 while True:
     event, values = win.read()
-    print(event)
 
     # Read input values
     server_host = values['-SERVER_HOST-']
@@ -106,9 +105,11 @@ while True:
     win['-SERVER_ERROR-'].update("")
     win['-MEMBER_ERROR-'].update("")
     win['-REGISTER_MESSAGE-'].update("")
+    win['-ORDER_ERROR-'].update("")
 
     # See if user wants to quit or window was closed
     if event == sg.WINDOW_CLOSED:
+        # TODO: Clear data (team, members, orders)
         break
     
     # See if server information are filled
@@ -127,9 +128,10 @@ while True:
             error = "Please fill in the missing information!"
             win['-MEMBER_ERROR-'].update(error)
         else:
-            # Add player to server, get player id
+            # Connect to server
             socket.connect(f"tcp://{server_host}:{server_port}")
 
+            # Add player to server, get player id
             sanitized_family_name = family_name.replace(" ", "_")
             sanitized_given_name = given_name.replace(" ", "_")
             request = f"add_player {sanitized_family_name} {sanitized_given_name}"
@@ -158,9 +160,10 @@ while True:
             win['-REGISTER_MESSAGE-'].update(error)
             win['-REGISTER_MESSAGE-'].update(text_color='red')
         else:
-            # Add team to server, get team id
+            # Connect to server
             socket.connect(f"tcp://{server_host}:{server_port}")
 
+            # Add team to server, get team id
             sanitized_team_name = team_name.replace(" ", "_")
             sanitized_player_ids = " ".join(player_ids)
             request = f"add_team {sanitized_team_name} {sanitized_player_ids}"
@@ -190,16 +193,18 @@ while True:
                 win['-REGISTER_MESSAGE-'].update(message)
                 win['-REGISTER_MESSAGE-'].update(text_color='red')
     
-    # Get team live orders when refreshed
-    elif event == '-REFRESH-':
+    # Update team details when user changes tabs or refreshes
+    elif event == '-TABS-' or event == '-REFRESH-':
         if team_id is None:
             # Show error message to register team first
             error = "Please register team first!"
             win['-ORDER_ERROR-'].update(error)
             win['-ORDER_ERROR-'].update(text_color='red')
         else:
-            # Get team live orders from server
+            # Connect to server
             socket.connect(f"tcp://{server_host}:{server_port}")
+
+            # Get team live orders
             request = f"get_team_live_orders {team_id}"
             socket.send_string(request)
             message = socket.recv().decode("utf-8")
@@ -212,8 +217,21 @@ while True:
                 for order_str in orders:
                     order = order_str.split("_")
                     team_orders.append(order)
-                print(team_orders)
                 win['-ORDER_TABLE-'].update(team_orders)
+            elif status == '[ERROR]':
+                win['-ORDER_ERROR-'].update(message)
+                win['-ORDER_ERROR-'].update(text_color='red')
+            
+            # TODO: Get P&L & trades status (team metrics)
+            # request = f"get_team_metrics {team_id}"
+            # socket.send_string(request)
+            # message = socket.recv().decode("utf-8")
+            # status = message.split()[0]
+
+            # if status == '[OK]':
+            #     pass
+            # elif status == '[ERROR]':
+            #     pass
 
 # Finish up by removing from the screen
 win.close()

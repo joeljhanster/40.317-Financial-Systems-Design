@@ -1,7 +1,7 @@
 from singleton import Singleton
 from player import Player
 
-class PlayerFactory:
+class PlayerFactory(object):
     __metaclass__ = Singleton
 
     def __init__(self):
