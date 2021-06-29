@@ -55,7 +55,7 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide player name!"
             elif len(options) != 2:
-                response = f"[ERROR] Requires 2 args: family_name, given_name."
+                response = f"[ERROR] Requires 2 args: family_name given_name."
                 
             elif (options[0].isalpha() and options[1].isalpha()) is not True:
                 response = f"[ERROR] Only alphabetical characters allowed"
@@ -134,12 +134,11 @@ while True:
                 response = "[ERROR] Please provide team id!"
             elif len(options) != 1:
                 respones = f"[ERROR] Requires 1 arg: team_id"
-            elif 1:
-                #TODO: Do a check if the team_id exists in the team_factory. 
-                pass
             else:
                 team_id = options[0]
-                
+                if team_factory.get_team(team_id) == None:
+                    response = f"[ERROR] Team id {team_id} does not exist."
+
                 # TODO: Get PnL
                 team = team_factory.get_team(team_id)
                 pnl = team.pnl
@@ -154,6 +153,10 @@ while True:
         # TODO
         elif cmd == "cancel_live_order":
             # <idToCancel> <teamId>
+            if len(options) != 2:
+                response = f"[ERROR] Requires 2 arg: order_id team_id"
+            else:
+                raise NotImplementedError("hHAHAHAHAHAHAHAHAHA")
             pass
 
 
