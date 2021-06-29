@@ -55,10 +55,10 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide player name!"
             elif len(options) != 2:
-                response = f"[ERROR] Required 2 arguments, found {len(options)}"
+                response = f"[ERROR] Requires 2 args: family_name, given_name."
                 
-            elif options[1].isalpha() and options[2].isalpha():
-                response = f"[ERROR] Only alphabetical characters allowed}"
+            elif (options[0].isalpha() and options[1].isalpha()) is not True:
+                response = f"[ERROR] Only alphabetical characters allowed"
             else:
                 family_name = options[0].replace("_", " ")
                 given_name = options[1].replace("_", " ")
@@ -110,13 +110,15 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide team id!"
             elif len(options) != 1:
-                response = f"[ERROR] Required 1 argument, found {len(options)}"
+                response = "[ERROR] Requires 1 arg: team_id"
             else:
                 team_id = options[0]
 
                 # Instantiate Order objects and add to Team object
                 orders = team_factory.get_live_orders(team_id)
-                if len(orders) > 0:
+                if orders == None:
+                    response = f"[ERROR] Team id {team_id} does not exist."
+                elif len(orders) > 0:
                     # <order_id>_<size>_<price>_<type>_<status>
                     # e.g. 8_50_98.0_BUY_LIVE
                     formatted_orders = order_factory.format_orders(orders)
@@ -131,7 +133,10 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide team id!"
             elif len(options) != 1:
-                respones = f"[ERROR] Required 1 argment, found {len(options)}"
+                respones = f"[ERROR] Requires 1 arg: team_id"
+            elif 1:
+                #TODO: Do a check if the team_id exists in the team_factory. 
+                pass
             else:
                 team_id = options[0]
                 
