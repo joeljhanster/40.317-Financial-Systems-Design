@@ -1,24 +1,6 @@
 
-from server import order_factory as order
+x = [1, 4, 5]
 
-# x = order.create_order()
-# t = type(x)
+y = ' '.join([str(i) for i in x])
 
-
-# b = isinstance(x, t)
-# print(b)
-
-# float(1.45)
-
-x = '-3123'
-
-
-i = int(x)
-
-
-
-print(i)
-
-
-
-    
+print(y)

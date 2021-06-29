@@ -1,12 +1,15 @@
 from player import Player
 from order import Order
+from trade import Trade
 
 class Team:
-    def __init__(self, id, name, players, orders=[]):
+    def __init__(self, id, name, players, orders=[], trades=[]):
         self.id = id
         self.name = name
         self.players = players
         self.orders = orders
+        self.trades = trades
+
         self.pnl = 0.0
     
     @property
@@ -52,15 +55,29 @@ class Team:
         return self._orders
     
     @orders.setter
-    def orders(self, o):
-        if isinstance(o, list):
-            for order in o:
-                if not isinstance(order, Order):
+    def orders(self, ls):
+        if isinstance(ls, list):
+            for o in ls:
+                if not isinstance(o, Order):
                     raise TypeError(f"Element in orders list must be of Order type")
-            self._orders = o
+            self._orders = ls
         else:
             raise TypeError(f"Orders must be of List type")
     
+    @property
+    def trades(self):
+        return self._trades
+
+    @trades.setter
+    def trades(self, ls):
+        if isinstance(ls, list):
+            for t in ls:
+                if not isinstance(t, Trade):
+                    raise TypeError(f"Element in trades list must be of Trade type")
+            self._trades = ls
+        else:
+            raise TypeError(f"Trades must be of List type")
+
     @property
     def pnl(self):
         return self._pnl

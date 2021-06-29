@@ -1,7 +1,6 @@
 
-from . import order, order_factory
+from order import Order
 
-O = order_factory.create_order()
 trade_status_types = ["MATCHED", "UNMATCHED", "ERROR"]
 
 class Trade:
@@ -18,10 +17,10 @@ class Trade:
     @our_order.setter           # decorate the setter method
     # our_order must be of Order instantiation
     def our_order(self, o):
-        if isinstance(o, type(O)):
+        if isinstance(o, Order):
             self._our_order = o
         else:
-            raise TypeError(f"attr our_order must be of {type(O)}")
+            raise TypeError(f"attr our_order must be of {Order}")
 
     @property        
     def their_order(self): 
@@ -30,10 +29,10 @@ class Trade:
     @their_order.setter     
     # their_order can be of None, or of Order instantiation
     def their_order(self, o):
-        if isinstance(o, type(O)) or o == None:
+        if isinstance(o, Order) or o == None:
             self._their_order = o
         else:
-            raise TypeError(f"attr their_order must be either None, or of {type(O)}")
+            raise TypeError(f"attr their_order must be either None, or of {Order}")
 
 
     @property

@@ -1,6 +1,5 @@
 import unittest
 from .order import Order
-from . import order_factory as order
 
 class Test(unittest.TestCase):
 
@@ -61,12 +60,6 @@ class Test(unittest.TestCase):
                 self.assertTrue(0)
             except ValueError:
                 pass
-
-    def test_create_order(self):
-        # test Order factory method
-        order.create_order()
-        order.create_order(id=1001)
-        order.create_order(id=1001, team_id=2, dir='BUY')
 
 if __name__ == '__main__':
     unittest.main()

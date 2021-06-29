@@ -133,17 +133,22 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide team id!"
             elif len(options) != 1:
-                respones = f"[ERROR] Requires 1 arg: team_id"
+                response = f"[ERROR] Requires 1 arg: team_id"
             else:
                 team_id = options[0]
-                if team_factory.get_team(team_id) == None:
-                    response = f"[ERROR] Team id {team_id} does not exist."
-
-                # TODO: Get PnL
                 team = team_factory.get_team(team_id)
-                pnl = team.pnl
+                if team == None:
+                    response = f"[ERROR] Team id {team_id} does not exist."
+                else:
+                    # TODO: Get PnL
+                    pnl = team.pnl
+                    # TODO: Get Trade Counts
+                    t_cnts = team_factory.get_team_trades_counts(team_id)
+                    fmt = ' '.join([str(x) for x in t_cnts])
 
-                # TODO: Get Trade Counts
+                    response = f"[OK] {pnl} {fmt}"
+
+                    
 
         # TODO
         elif cmd == "submit_and_match":
