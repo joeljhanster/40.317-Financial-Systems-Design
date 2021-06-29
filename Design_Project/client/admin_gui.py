@@ -11,29 +11,24 @@ col1 = sg.Column([[sg.Frame(layout=[
             [sg.T("Server port number:"), sg.In(size=(10,1))]],
         title='Settings',
         font='Gotham')],
-    [sg.Frame(layout=[[sg.Button("Launch Server"), sg.Button("Shut Down Server")],
-                                          [sg.Button("Open the Market",bg='blue'), sg.Button("Close the Market")],
-                                          [sg.Button("Clear Trade History")]],title='Controls',font='Gotham')]])
+    [sg.Frame(layout=[[sg.Button("Launch Server", button_color=('green')), sg.Button("Shut Down Server", button_color=('red'))],
+                                          [sg.Button("Open the Market",button_color=('green')), sg.Button("Close the Market", button_color=('red'))],
+                                          [sg.Button("Clear Trade History", button_color=('white'))]],title='Controls',font='Gotham')]])
 
 
 tab1_layout = [[col1]]   
 
-col3 = sg.Column([[sg.Button('"Trade Warriors" ORDER BOOK', size=(30,1))],
-                   [sg.Table(values = [], headings=['ID #', 'SIZE', 'PRICE', 'TYPE', 'STATUS'], auto_size_columns=False, col_widths=[10, 10, 10, 10, 10])],
-                  [sg.Button('REFRESH', size=(10,1)), sg.Button('FILL', size=(10,1)), sg.Button('CANCEL', size=(10,1))]
-                ],element_justification ='centre')
+col2 = sg.Column([[sg.Frame(layout=[
+            [sg.T("Team"), sg.T(" "*30), sg.T("P&L")],
+            [sg.T("Team_A"), sg.T(" "*30), sg.In(size=(20,1))],
+            [sg.T("Team_B"), sg.T(" "*30), sg.In(size=(20,1))]],
+        title='Metrics',
+        font='Gotham')],
+    [sg.Frame(layout=[[sg.T("Elapsed time since open:"), sg.In(size=(10,1))],
+                                          [sg.T("Last trade price:"), sg.In(size=(10,1))]],title='Market',font='Gotham')]])
 
-col4 = sg.Column([[sg.T('P&L', size=(15,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0.00', size=(15,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('# MATCHED TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('# UNMATCHED TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('# ERROR TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                ],element_justification ='centre')
 
-tab2_layout = [[col3, col4]]    
+tab2_layout = [[col2]]    
 
 layout = [[sg.TabGroup([[sg.Tab('Settings and Controls', tab1_layout, tooltip='tip'), 
          sg.Tab('Metrics and Market', tab2_layout)]], tooltip='TIP2')]]
