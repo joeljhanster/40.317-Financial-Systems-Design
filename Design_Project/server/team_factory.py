@@ -19,10 +19,14 @@ class TeamFactory:
             if str(team.id) == str(team_id):
                 return team
         return None
+
+    def add_orders(self, team_id, orders):
+        team = self.get_team(team_id)
+        team.orders = orders
     
     def get_live_orders(self, team_id):
-       team = self.get_team(team_id)
+        team = self.get_team(team_id)
 
-       if team is not None:
-           orders = team.orders
-           return orders
+        if team is not None:
+            orders = team.orders
+            return orders

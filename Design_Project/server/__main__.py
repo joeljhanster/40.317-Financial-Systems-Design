@@ -93,11 +93,12 @@ while True:
                         players.append(player)
                 
                 if not is_error:
-                    # Instantiate Order objects and add to Team object
-                    orders = order_factory.create_batch_orders(num=8)
-
                     # Instantiate new Team object, return TeamID as response
-                    team = team_factory.add_team(team_name, players, orders)
+                    team = team_factory.add_team(team_name, players)
+
+                    # Instantiate Order objects and add to Team object
+                    orders = order_factory.create_batch_orders(team.id, 8)
+                    team_factory.add_orders(team.id, orders)
 
                     response = f"[OK] Added Team Id {team.id}"  # team.id needs to be the last argument
 
