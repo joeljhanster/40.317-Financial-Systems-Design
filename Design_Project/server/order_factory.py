@@ -39,5 +39,4 @@ class OrderFactory(object):
         for order in orders:
             formatted += " "
             formatted += repr(order)
-            print(formatted)
         return formatted
