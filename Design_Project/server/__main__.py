@@ -76,7 +76,7 @@ while True:
         print(f"Received: {cmd} {options}")
 
         # The response is a function of cmd and options:
-        response = ""
+        response = "[ERROR] Unknown command"
 
         ### INSERT COMMANDS HERE ###
         ### TEAM COMMANDS ###
@@ -138,7 +138,7 @@ while True:
 
         elif cmd == "get_team_live_orders":
             if len(options) == 0:
-                response = "[ERROR] Please provide team id!"
+                response = "[ERROR] Requires 1 arg: team_id"
             elif len(options) != 1:
                 response = "[ERROR] Requires 1 arg: team_id"
             else:
@@ -249,19 +249,20 @@ while True:
                     response = "[OK] Market closed"
                 else:
                     response = "[ERROR] Failed to close market"
-        
+
+        elif cmd == "get_start_time":
+            start_time = str(exchange_server.get_start_time())
+            response = f"[OK] {start_time}"
+
         elif cmd == "get_elapsed_time":
             elapsed_time = exchange_server.get_elapsed_time()
             if elapsed_time:
                 response = f"[OK] {elapsed_time}"
             else:
                 response = f"[ERROR] Market is closed!"
-        
-        elif cmd == "get_start_time":
-            response = exchange_server.get_start_time()
-        
+
         elif cmd == "get_market_status":
-            status = exchange_exchange.get_market_status()
+            status = exchange_server.get_market_status()
             if status:
                 response = "[OK] Market opened"
             else:

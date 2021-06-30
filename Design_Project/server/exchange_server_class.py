@@ -47,7 +47,6 @@ class ExchangeServer:
     
     def add_team(self, team):
         if isinstance(team, Team):
-            print(self.exchange)
             self.exchange.teams.append(team)
 
     def update_team_metrics(self, team):

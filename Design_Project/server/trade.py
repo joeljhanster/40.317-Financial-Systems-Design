@@ -29,11 +29,11 @@ class Trade:
         else:
             raise TypeError("id must be of Integer type")
 
-    @property                   # decorate the getter method
+    @property             
     def buy_order(self): 
         return self._buy_order
 
-    @buy_order.setter           # decorate the setter method
+    @buy_order.setter          
     # buy_order must be of Order instantiation
     def buy_order(self, o):
         if o is None:
