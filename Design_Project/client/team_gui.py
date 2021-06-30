@@ -168,7 +168,7 @@ while True:
             socket.connect(f"tcp://{server_host}:{server_port}")
 
             # Add team to server, get team id
-            sanitized_team_name = team_name.replace(" ", "_")
+            sanitized_team_name = team_name.replace(" ", "-").strip()
             sanitized_player_ids = " ".join(player_ids)
             request = f"add_team {sanitized_team_name} {sanitized_player_ids}"
             
@@ -180,7 +180,7 @@ while True:
                 team_id = message.split()[-1]
                 win['-REGISTER_MESSAGE-'].update(message)
                 win['-REGISTER_MESSAGE-'].update(text_color='green')
-                win['-BOOK_TITLE-'].update(f'"{team_name.upper()}" ORDER BOOK')
+                win['-BOOK_TITLE-'].update(f'"{team_name.upper().replace("-", " ")}" ORDER BOOK')
                 
                 # Disable all elements to prevent further editing
                 win['-SERVER_HOST-'].update(disabled=True)
@@ -237,7 +237,7 @@ while True:
                 metric = message.split()[1].split("_")
                 print(metric)
                 team_id = metric[0]
-                team_name = metric[1]
+                team_name = metric[1].replace("-", " ")
                 team_pnl = metric[2]
                 team_matched = metric[3]
                 team_unmatched = metric[4]

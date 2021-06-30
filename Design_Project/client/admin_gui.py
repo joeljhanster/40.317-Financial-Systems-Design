@@ -150,12 +150,12 @@ while True:
             for metrics_str in metrics:
                 metric = metrics_str.split("_")
                 team_id = metric[0]
-                team_name = metric[1]
+                team_name = metric[1].replace("-", " ")
                 team_pnl = metric[2]
                 team_matched = metric[3]
                 team_unmatched = metric[4]
                 team_error = metric[5]
-                team_metrics.append(metric[1:3])
+                team_metrics.append([team_name, team_pnl])
             win['-TEAMS_TABLE-'].update(team_metrics)
 
         elif status == '[ERROR]':

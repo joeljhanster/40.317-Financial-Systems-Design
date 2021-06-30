@@ -100,10 +100,10 @@ while True:
             if len(options) == 0:
                 response = "[ERROR] Please provide team name and player ids!"
             elif len(options) == 1:
-                team_name = options[0].replace("_", " ")
+                team_name = options[0].replace("-", " ")
                 response = f"[ERROR] Please provide player ids for Team {team_name}!"
             else:
-                team_name = options[0].replace("_", " ")
+                team_name = options[0]
                 player_ids = options[1:]
                 players = []
                 is_error = False
