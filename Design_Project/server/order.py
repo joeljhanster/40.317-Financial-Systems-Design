@@ -85,6 +85,21 @@ class Order:
             self._price = x
         except ValueError:
             raise ValueError(f"price must be (positive) float")
+    
+    @property
+    def size(self):
+        return self._size
+    
+    @size.setter
+    # size must be positive integer
+    def size(self, x):
+        if isinstance(x, int):
+            if x > 0:
+                self._size = x
+            else:
+                raise ValueError(f"size must be positive")
+        else:
+            raise TypeError(f"size must be (positive) integer")
 
     def __repr__(self):
         return f"{self.id}_{self.size}_{self.price}_{self.dir}_{self.status}"

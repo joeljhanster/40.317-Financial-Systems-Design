@@ -8,8 +8,10 @@ class Team:
         self.name = name
         self.players = players
         self.orders = orders
-        self.trades = trades
-
+        self.trades = trades    # may not need this
+        self.matched_trades = 0
+        self.unmatched_trades = 0
+        self.error_trades = 0
         self.pnl = 0.0
     
     @property

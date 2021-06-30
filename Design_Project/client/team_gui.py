@@ -6,7 +6,6 @@ import re
 
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
-connected = False
 
 sg.theme('Default1')
 
@@ -48,7 +47,7 @@ col2 = sg.Column([
     [sg.T('TEAM MEMBERS', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
     [sg.Table(
         key='-PLAYERS_TABLE-',
-        values = [],
+        values=[],
         headings=['ID #', 'FAMILY NAME', 'GIVEN NAME'], 
         auto_size_columns=False,
         col_widths=[5, 20, 20],
@@ -61,20 +60,21 @@ tab1_layout = [[col1, col2]]
 
 col3 = sg.Column([
     [sg.T('TEAM ORDER BOOK', key='-BOOK_TITLE-', size=(30,1), justification='center', relief=sg.RELIEF_RIDGE)],
-    [sg.Table(key='-ORDER_TABLE-', values = [], headings=['ID #', 'SIZE', 'PRICE', 'TYPE', 'STATUS'], auto_size_columns=False, col_widths=[10, 10, 10, 10, 10])],
-    [sg.Button('REFRESH', key='-REFRESH-', size=(10,1)), sg.Button('FILL', size=(10,1)),
-    sg.Button('CANCEL', size=(10,1))],
+    [sg.Table(key='-ORDER_TABLE-', values = [], headings=['ID #', 'SIZE', 'PRICE', 'TYPE', 'STATUS'], auto_size_columns=False, enable_events=True, col_widths=[10, 10, 10, 10, 10])],
+    [sg.Button('REFRESH', key='-REFRESH-', size=(10,1)),
+    sg.Button('FILL', key='-FILL-', size=(10,1)),
+    sg.Button('CANCEL', key='-CANCEL-', size=(10,1))],
     [sg.T('', key='-ORDER_ERROR-', size=(30, 1))]
 ], element_justification = 'center')
 
 col4 = sg.Column([[sg.T('P&L', size=(15,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0.00', size=(15,1), justification='center', relief=sg.RELIEF_RIDGE)],
+                [sg.T('0.00', key='-P&L-', size=(15,1), justification='center', relief=sg.RELIEF_RIDGE)],
                 [sg.T('# MATCHED TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
+                [sg.T('0', key='-MATCHED-', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
                 [sg.T('# UNMATCHED TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
+                [sg.T('0', key='-UNMATCHED-', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
                 [sg.T('# ERROR TRADES', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
-                [sg.T('0', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
+                [sg.T('0', key='-ERROR-', size=(20,1), justification='center', relief=sg.RELIEF_RIDGE)],
                 ],element_justification = 'center')
 
 tab2_layout = [[col3, col4]]    
@@ -94,6 +94,10 @@ while True:
     team_name = values['-TEAM_NAME-']
     family_name = values['-FAMILY_NAME-']
     given_name = values['-GIVEN_NAME-']
+    if len(values['-ORDER_TABLE-']) == 1:
+        selected_order = team_orders[values['-ORDER_TABLE-'][0]]
+    else:
+        selected_order = None
 
     # print('SERVER IP ADDRESS is:', server_host)
     # print('SERVER PORT is:', server_port)
@@ -223,15 +227,59 @@ while True:
                 win['-ORDER_ERROR-'].update(text_color='red')
             
             # TODO: Get P&L & trades status (team metrics)
-            # request = f"get_team_metrics {team_id}"
-            # socket.send_string(request)
-            # message = socket.recv().decode("utf-8")
-            # status = message.split()[0]
+            request = f"get_team_metrics {team_id}"
+            socket.send_string(request)
+            message = socket.recv().decode("utf-8")
+            status = message.split()[0]
 
-            # if status == '[OK]':
-            #     pass
-            # elif status == '[ERROR]':
-            #     pass
+            if status == '[OK]':
+                print(message)
+                metric = message.split()[1].split("_")
+                print(metric)
+                team_id = metric[0]
+                team_name = metric[1]
+                team_pnl = metric[2]
+                team_matched = metric[3]
+                team_unmatched = metric[4]
+                team_error = metric[5]
 
+                win['-P&L-'].update(team_pnl)
+                win['-MATCHED-'].update(team_matched)
+                win['-UNMATCHED-'].update(team_unmatched)
+                win['-ERROR-'].update(team_error)
+            elif status == '[ERROR]':
+                print(message)
+    
+    # TODO: Fill order
+    elif event == '-FILL-':
+        if team_id is None:
+            # Show error message to register team first
+            error = "Please register team first!"
+            win['-ORDER_ERROR-'].update(error)
+            win['-ORDER_ERROR-'].update(text_color='red')
+        elif selected_order is None:
+            # Show error message to select ONE order first
+            error = "Please select ONE order to fill!"
+            win['-ORDER_ERROR-'].update(error)
+            win['-ORDER_ERROR-'].update(text_color='red')
+        else:
+            # Connect to server
+            socket.connect(f"tcp://{server_host}:{server_port}")
+
+            # Select ONE order before filling
+            print(selected_order)
+            order_id = selected_order[0]
+            print(order_id)
+
+            # TODO: Popup to fill trade price and size (unless default 50)
+            trade_price = 70
+            trade_size = 50
+
+            # Submit filled order
+            request = f"submit_and_match {order_id} {team_id} {trade_price} {trade_size}"
+            socket.send_string(request)
+            message = socket.recv().decode("utf-8")
+            status = message.split()[0]
+            print(message)
 # Finish up by removing from the screen
 win.close()

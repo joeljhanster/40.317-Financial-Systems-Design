@@ -2,11 +2,15 @@
 import zmq
 import sys
 import re
+from decimal import Decimal, DecimalException
 
 from exchange import Exchange
+from exchange_server_class import ExchangeServer
+from exchange_client_class import ExchangeClient
 from player_factory import PlayerFactory
 from team_factory import TeamFactory
 from order_factory import OrderFactory
+from trade_factory import TradeFactory
 
 # To run the server at a non-default port, the user provides the alternate port
 # number on the command line.
@@ -26,11 +30,36 @@ socket = context.socket(zmq.REP)
 socket.bind(f"tcp://{host}:{port}")
 print("I am the server, now alive and listening on port", port)
 
+# Additional Functions
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def is_positive_number(s):
+    if is_number(s):
+        return Decimal(s) >= 0
+    else:
+        return False
+
+def is_positive_integer(s):
+    if is_positive_number(s):
+        return s.isnumeric()
+    else:
+        return False
+
 # Instantiate the Exchange
 exchange = Exchange()
+exchange_server = ExchangeServer(exchange)
+exchange_client = ExchangeClient(exchange)
+
+# Instantiate the Factory
 player_factory = PlayerFactory()
 team_factory = TeamFactory()
 order_factory = OrderFactory()
+trade_factory = TradeFactory()
 
 while True:
     message = socket.recv()
@@ -103,6 +132,7 @@ while True:
                     # Instantiate Order objects and add to Team object
                     orders = order_factory.create_batch_orders(team.id, 8)
                     team_factory.add_orders(team.id, orders)
+                    exchange_server.add_team(team)
 
                     response = f"[OK] Added Team Id {team.id}"  # team.id needs to be the last argument
 
@@ -122,7 +152,7 @@ while True:
                     # <order_id>_<size>_<price>_<type>_<status>
                     # e.g. 8_50_98.0_BUY_LIVE
                     formatted_orders = order_factory.format_orders(orders)
-                    response = f"[OK]{formatted_orders}"
+                    response = f"[OK] {formatted_orders.strip()}"
                 else:
                     response = "[ERROR] Team currently has no live orders"
 
@@ -140,21 +170,51 @@ while True:
                 if team == None:
                     response = f"[ERROR] Team id {team_id} does not exist."
                 else:
-                    # TODO: Get PnL
-                    pnl = team.pnl
-                    # TODO: Get Trade Counts
-                    t_cnts = team_factory.get_team_trades_counts(team_id)
-                    fmt = ' '.join([str(x) for x in t_cnts])
+                    exchange_server.update_team_metrics(team)
+                    metrics = exchange_client.get_team_metrics(team)
+                    response = f"[OK] {metrics}"
+                    # # TODO: Get PnL
+                    # pnl = team.pnl
+                    # # TODO: Get Trade Counts
+                    # t_cnts = team_factory.get_team_trades_counts(team_id)
+                    # fmt = ' '.join([str(x) for x in t_cnts])
 
-                    response = f"[OK] {pnl} {fmt}"
-
-                    
+                    # response = f"[OK] {pnl} {fmt}"
 
         # TODO
         elif cmd == "submit_and_match":
             # <idToFill>,<teamID>,<fillOrder.TradePrice>,<fillOrder.TradeSize>
-            pass
-        
+            if len(options) != 4:
+                response = "[ERROR] Requires 4 args: order_id team_id trade_price trade_size"
+            elif (
+                not is_positive_integer(options[0]) or
+                not is_positive_integer(options[1]) or
+                not is_positive_number(options[2]) or
+                not is_positive_integer(options[3])
+            ):
+                response = "[ERROR] Values must be positive integers!"
+            else:
+                order_id = int(options[0])
+                team_id = int(options[1])
+                trade_price = float(options[2])
+                trade_size = int(options[3])
+
+                # Check if market is open
+                market_status = exchange_server.get_market_status()
+                if market_status:
+                    # TODO: Trade size must be <= order size
+
+                    # Check correct value
+                    order = order_factory.get_order(order_id, team_id)
+                    print(order)
+                    if order:
+                        exchange_client.submit_order(order, trade_price, trade_size, trade_factory)
+                        response = f"[OK] Order ID {order_id} is successfully submitted!"
+                    else:
+                        response = f"[ERROR] Order ID {order_id} not found!"
+                else:
+                    response = f"[ERROR] Market is closed!"
+
         # TODO
         elif cmd == "cancel_live_order":
             # <idToCancel> <teamId>
@@ -166,42 +226,63 @@ while True:
 
 
         ### TODO ADMIN COMMANDS ###
-        # elif cmd == "open_market":
-        #     if len(options) != 0:
-        #         response = f"[ERROR] Required no arguments, found {len(options)}"
-        #     else:
-        #         exchange.open_market()
-        #         status = exchange.get_market_status()
+        elif cmd == "open_market":
+            if len(options) != 0:
+                response = f"[ERROR] Required no arguments, found {len(options)}"
+            else:
+                exchange_server.open_market()
+                status = exchange_server.get_market_status()
 
-        #         if status:
-        #             response = "[OK] Market opened"
-        #         else:
-        #             response = "[ERROR] Failed to open market"
+                if status:
+                    response = "[OK] Market opened"
+                else:
+                    response = "[ERROR] Failed to open market"
 
-        # elif cmd == "close_market":
-        #     if len(options) != 0:
-        #         response = (f"[ERROR] Required no arguments, found {len(options)}")
-        #     else:
-        #         exchange.close_market()
-        #         status = exchange.get_market_status()
+        elif cmd == "close_market":
+            if len(options) != 0:
+                response = f"[ERROR] Required no arguments, found {len(options)}"
+            else:
+                exchange_server.close_market()
+                status = exchange_server.get_market_status()
 
-        #         if not status:
-        #             response = "[OK] Market closed"
-        #         else:
-        #             response = "[ERROR] Failed to close market"
+                if not status:
+                    response = "[OK] Market closed"
+                else:
+                    response = "[ERROR] Failed to close market"
         
-        # elif cmd == "get_elapsed_time":
-        #     response = exchange.get_elapsed_time()
+        elif cmd == "get_elapsed_time":
+            elapsed_time = exchange_server.get_elapsed_time()
+            if elapsed_time:
+                response = f"[OK] {elapsed_time}"
+            else:
+                response = f"[ERROR] Market is closed!"
         
-        # elif cmd == "get_start_time":
-        #     response = exchange.start_time
+        elif cmd == "get_start_time":
+            response = exchange_server.get_start_time()
         
-        # elif cmd == "get_market_status":
-        #     status = exchange.get_market_status()
-        #     if status:
-        #         response = "[OK] Market opened"
-        #     else:
-        #         response = "[OK] Market closed"
-
+        elif cmd == "get_market_status":
+            status = exchange_exchange.get_market_status()
+            if status:
+                response = "[OK] Market opened"
+            else:
+                response = "[OK] Market closed"
+        
+        elif cmd == "get_all_team_metrics":
+            if len(options) != 0:
+                response = f"[ERROR] Required no arguments, found {len(options)}"
+            else:
+                exchange_server.update_all_team_metrics()
+                metrics = exchange_client.get_all_team_metrics()
+                response = f"[OK] {metrics.strip()}"
+        
+        elif cmd == "get_last_trade_price":
+            if len(options) != 0:
+                response = f"[ERROR] Required no arguments, found {len(options)}"
+            else:
+                last_price = exchange_server.get_last_trade_price()
+                if last_price:
+                    response = f"[OK] {last_price}"
+                else:
+                    response = "[ERROR] Trade history is empty"
 
         socket.send_string(response)
