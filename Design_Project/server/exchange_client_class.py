@@ -36,6 +36,7 @@ class ExchangeClient:
                     # Move trade to matched list
                     self.exchange.trade_history.append(trade)
                     matched = True
+                    # TODO: If matched then update Order status to FILLED
                     break
                 
         # Else append to unmatched trade
@@ -43,6 +44,8 @@ class ExchangeClient:
             # Create new unmatched trade and append to the exchange list
             trade = trade_factory.add_unmatched_trade(order, price, size)
             self.exchange.unmatched_trade.append(trade)
+
+            # TODO: If not matched then update Order status to SUBMITTED
     
     def get_team_metrics(self, team):
         return f"{team.id}_{team.name}_{team.pnl}_{team.matched_trades}_{team.unmatched_trades}_{team.error_trades}"

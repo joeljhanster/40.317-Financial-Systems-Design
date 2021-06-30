@@ -210,8 +210,11 @@ while True:
                     if order:
                         exchange_client.submit_order(order, trade_price, trade_size, trade_factory)
                         response = f"[OK] Order ID {order_id} is successfully submitted!"
+
+                        
+
                     else:
-                        response = f"[ERROR] Order ID {order_id} not found!"
+                        response = f"[ERROR] Order ID {order_id} from Team ID {team_id} not found!"
                 else:
                     response = f"[ERROR] Market is closed!"
 

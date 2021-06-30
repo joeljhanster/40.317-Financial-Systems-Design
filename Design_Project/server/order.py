@@ -106,5 +106,5 @@ class Order:
         # return f"(Order: {self.id}, {self.dir}, {self.status}, {self.price})"
 
     def __str__(self):
-        return f"Order ID {self.id}. Direction: {self.dir}. Status: {self.status}"
+        return f"Order ID: {self.id}. Team ID: {self.team_id}. Price: {self.price}. Direction: {self.dir}. Status: {self.status}"
 
